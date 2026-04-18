@@ -1,12 +1,12 @@
 import User from '../models/User.js';
 import Organization from '../models/Organization.js';
-import UpgradeRequest from '../models/UpgradeRequest.js';
+import RoleUpgradeRequest from '../models/RoleUpgradeRequest.js';
 
 export const getAdminStats = async (req, res) => {
     try {
         const totalUsers = await User.countDocuments();
         const totalOrganizations = await Organization.countDocuments();
-        const pendingRequests = await UpgradeRequest.countDocuments({ status: 'pending' });
+        const pendingRequests = await RoleUpgradeRequest.countDocuments({ status: 'pending' });
 
         res.json({
             totalUsers,
