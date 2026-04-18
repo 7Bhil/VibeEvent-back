@@ -1,14 +1,16 @@
 import express from 'express';
-import { createEvent, getEvents, getMyEvents, deleteEvent, getEventById } from '../controllers/eventController.js';
+import { createEvent, getEvents, getMyEvents, deleteEvent, getEventById, getOrganizerStats, toggleHype } from '../controllers/eventController.js';
 import { protect, organizer } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/', getEvents);
-router.get('/:id', getEventById);
-router.post('/', protect, organizer, createEvent);
-
+router.get('/stats', protect, organizer, getOrganizerStats);
 router.get('/my-events', protect, organizer, getMyEvents);
+router.get('/:id', getEventById);
+
+router.post('/:id/hype', protect, toggleHype);
+router.post('/', protect, organizer, createEvent);
 router.delete('/:id', protect, organizer, deleteEvent);
 
 export default router;

@@ -49,6 +49,10 @@ const eventSchema = new mongoose.Schema({
         type: String,
         default: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80'
     },
+    hypeUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
     organization: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Organization',

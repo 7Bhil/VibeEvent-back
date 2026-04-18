@@ -64,6 +64,64 @@ export const getMyEvents = async (req, res) => {
     }
 };
 
+import Ticket from '../models/Ticket.js';
+
+export const getOrganizerStats = async (req, res) => {
+    try {
+        // Fetch all events by this organizer
+        const events = await Event.find({ createdBy: req.user._id });
+        const eventIds = events.map(e => e._id);
+        
+        // Fetch all tickets for these events
+        const tickets = await Ticket.find({ event: { $in: eventIds } });
+
+        const totalRevenue = tickets.reduce((acc, t) => acc + (t.pricePaid || 0), 0);
+        const ticketsSold = tickets.length;
+        const scansIn = tickets.filter(t => t.status === 'checked_in' || t.status === 'checked_out').length;
+
+        // Group tickets by event for chart data
+        const chartData = events.map(event => {
+            const eventTickets = tickets.filter(t => t.event.toString() === event._id.toString());
+            return {
+                name: event.title.substring(0, 15) + '...',
+                sales: eventTickets.reduce((acc, t) => acc + (t.pricePaid || 0), 0),
+                attendees: eventTickets.length
+            };
+        });
+
+        res.json({
+            totalEvents: events.length,
+            totalRevenue,
+            ticketsSold,
+            scansIn,
+            chartData
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const toggleHype = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ message: 'Event not found' });
+
+        const userIdStr = req.user._id.toString();
+        const hasHyped = event.hypeUsers.some(id => id.toString() === userIdStr);
+
+        if (hasHyped) {
+            event.hypeUsers = event.hypeUsers.filter(id => id.toString() !== userIdStr);
+        } else {
+            event.hypeUsers.push(req.user._id);
+        }
+
+        await event.save();
+        res.json({ hyped: !hasHyped, totalHype: event.hypeUsers.length });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 export const deleteEvent = async (req, res) => {
     try {
         const event = await Event.findById(req.params.id);
