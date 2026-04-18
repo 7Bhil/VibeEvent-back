@@ -16,11 +16,14 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
+        // Prevent registering as admin via public API
+        const desiredRole = role === 'admin' ? 'attendee' : role;
+
         const user = await User.create({
             name,
             email,
             password,
-            role
+            role: desiredRole
         });
 
         if (user) {
@@ -29,6 +32,7 @@ export const register = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                organization: user.organization,
                 token: generateToken(user._id)
             });
         }
@@ -41,7 +45,7 @@ export const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({ email }).populate('organization');
 
         if (user && (await user.comparePassword(password))) {
             res.json({
@@ -49,6 +53,7 @@ export const login = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                organization: user.organization,
                 token: generateToken(user._id)
             });
         } else {
