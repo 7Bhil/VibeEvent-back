@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 import organizationRoutes from './routes/organizationRoutes.js';
 import eventRoutes from './routes/eventRoutes.js';
-
+import ticketRoutes from './routes/ticketRoutes.js';
 
 dotenv.config();
 
@@ -20,8 +20,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/organizations', organizationRoutes);
 app.use('/api/events', eventRoutes);
-
-
+app.use('/api/tickets', ticketRoutes);
 
 app.get('/', (req, res) => res.json({ message: 'VibeEvent API is running' }));
 
