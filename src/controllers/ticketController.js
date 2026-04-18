@@ -120,3 +120,23 @@ export const scanTicket = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+// 5. Liste des participants pour un événement (Organizer)
+export const getEventAttendees = async (req, res) => {
+    try {
+        const { eventId } = req.params;
+        const event = await Event.findById(eventId);
+        
+        if (!event || event.createdBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Non autorisé' });
+        }
+
+        const tickets = await Ticket.find({ event: eventId })
+            .populate('user', 'name email createdAt')
+            .sort({ createdAt: -1 });
+
+        res.json(tickets);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

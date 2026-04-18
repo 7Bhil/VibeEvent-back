@@ -45,6 +45,13 @@ export const login = async (req, res) => {
         const user = await User.findOne({ email }).populate('organization');
 
         if (user && (await user.comparePassword(password))) {
+            // Check for role expiry during login
+            if (user.roleExpiresAt && new Date() > user.roleExpiresAt) {
+                user.role = 'attendee';
+                user.roleExpiresAt = null;
+                await user.save();
+            }
+
             res.json({
                 _id: user._id,
                 name: user.name,
@@ -56,6 +63,16 @@ export const login = async (req, res) => {
         } else {
             res.status(401).json({ message: 'Invalid email or password' });
         }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const getMe = async (req, res) => {
+    try {
+        // req.user is already populated by protect middleware
+        // and its role expiration has been checked there too.
+        res.json(req.user);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -33,14 +33,24 @@ export const getPendingRequests = async (req, res) => {
 
 export const handleRequest = async (req, res) => {
     try {
-        const { requestId, action } = req.body; // action: 'approve' or 'reject'
+        const { requestId, action, durationDays } = req.body; // action: 'approve' or 'reject', durationDays: number
         const request = await RoleUpgradeRequest.findById(requestId);
 
         if (!request) return res.status(404).json({ message: 'Request not found' });
 
         if (action === 'approve') {
             request.status = 'approved';
-            await User.findByIdAndUpdate(request.user, { role: 'organizer' });
+            
+            const updateData = { role: 'organizer' };
+            if (durationDays) {
+                const expiryDate = new Date();
+                expiryDate.setDate(expiryDate.getDate() + parseInt(durationDays));
+                updateData.roleExpiresAt = expiryDate;
+            } else {
+                updateData.roleExpiresAt = null; // Permanent if not specified
+            }
+
+            await User.findByIdAndUpdate(request.user, updateData);
         } else {
             request.status = 'rejected';
         }

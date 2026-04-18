@@ -8,8 +8,20 @@ export const protect = async (req, res, next) => {
         try {
             token = req.headers.authorization.split(' ')[1];
             const decoded = jwt.verify(token, process.env.JWT_SECRET);
-            req.user = await User.findById(decoded.id).select('-password');
-            next();
+            const user = await User.findById(decoded.id).select('-password');
+            
+            if (user) {
+                // Check for role expiry
+                if (user.roleExpiresAt && new Date() > user.roleExpiresAt) {
+                    user.role = 'attendee';
+                    user.roleExpiresAt = null;
+                    await user.save();
+                }
+                req.user = user;
+                next();
+            } else {
+                res.status(401).json({ message: 'User not found' });
+            }
         } catch (error) {
             res.status(401).json({ message: 'Not authorized, token failed' });
         }
