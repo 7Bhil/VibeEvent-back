@@ -35,3 +35,39 @@ export const getAllOrganizations = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const updateUserRole = async (req, res) => {
+    try {
+        const { role } = req.body;
+        const user = await User.findById(req.params.id);
+        
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        user.role = role;
+        // Reset expiry if they are updated manually
+        if (role !== 'organizer') {
+             user.roleExpiresAt = null;
+        }
+        await user.save();
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+export const toggleUserStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.params.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        
+        user.status = user.status === 'blocked' ? 'active' : 'blocked';
+        await user.save();
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

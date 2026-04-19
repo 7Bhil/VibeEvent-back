@@ -11,6 +11,11 @@ export const protect = async (req, res, next) => {
             const user = await User.findById(decoded.id).select('-password');
             
             if (user) {
+                // Check if user is blocked
+                if (user.status === 'blocked') {
+                    return res.status(403).json({ message: 'User account is blocked' });
+                }
+
                 // Check for role expiry
                 if (user.roleExpiresAt && new Date() > user.roleExpiresAt) {
                     user.role = 'attendee';

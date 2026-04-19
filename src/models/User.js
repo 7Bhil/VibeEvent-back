@@ -28,13 +28,21 @@ const userSchema = new mongoose.Schema({
         ref: 'Organization'
     },
     roleExpiresAt: {
-        type: Date
+        type: Date,
+        default: null
+    },
+    status: {
+        type: String,
+        enum: ['active', 'blocked'],
+        default: 'active'
     },
     createdAt: {
         type: Date,
         default: Date.now
     }
 
+}, {
+    timestamps: true
 });
 
 // Middleware to hash password before saving

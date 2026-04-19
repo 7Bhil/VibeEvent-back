@@ -26,7 +26,7 @@ app.use('/api/tickets', ticketRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/polls', pollRoutes);
 
-app.get('/', (req, res) => res.json({ message: 'VibeEvent API is running' }));
+app.get('/', (req, res) => res.json({ message: 'Evenflow API is running' }));
 
 import User from './models/User.js';
 
