@@ -4,7 +4,7 @@ const PollSchema = new mongoose.Schema({
     event: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
-        required: true
+        required: false
     },
     question: {
         type: String,

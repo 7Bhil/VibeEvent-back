@@ -19,6 +19,7 @@ export const protect = async (req, res, next) => {
                 // Check for role expiry
                 if (user.roleExpiresAt && new Date() > user.roleExpiresAt) {
                     user.role = 'attendee';
+                    user.plan = 'none';
                     user.roleExpiresAt = null;
                     await user.save();
                 }

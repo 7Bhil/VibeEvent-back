@@ -26,7 +26,7 @@ const eventSchema = new mongoose.Schema({
     tickets: [{
         tier: {
             type: String,
-            enum: ['Normal', 'VIP', 'VVIP'],
+            enum: ['Standard', 'VIP', 'Early Bird', 'Premium'],
             required: true
         },
         price: {

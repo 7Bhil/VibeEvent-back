@@ -13,7 +13,7 @@ const ticketSchema = new mongoose.Schema({
     },
     tier: { 
         type: String, 
-        enum: ['Normal', 'VIP', 'VVIP'], 
+        enum: ['Standard', 'VIP', 'Early Bird', 'Premium'], 
         required: true 
     },
     status: { 

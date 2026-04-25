@@ -11,6 +11,12 @@ const roleUpgradeRequestSchema = new mongoose.Schema({
         enum: ['pending', 'approved', 'rejected'],
         default: 'pending'
     },
+    plan: {
+        type: String,
+        enum: ['events_only', 'polls_only', 'premium'],
+        required: true,
+        default: 'premium'
+    },
     message: {
         type: String,
         trim: true

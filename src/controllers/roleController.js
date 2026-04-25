@@ -3,20 +3,34 @@ import User from '../models/User.js';
 
 export const requestUpgrade = async (req, res) => {
     try {
-        const { message } = req.body;
+        const { plan } = req.body; // 'events_only', 'polls_only', 'premium'
         const userId = req.user._id;
 
-        const existingRequest = await RoleUpgradeRequest.findOne({ user: userId, status: 'pending' });
-        if (existingRequest) {
-            return res.status(400).json({ message: 'A request is already pending' });
+        if (!['events_only', 'polls_only', 'premium'].includes(plan)) {
+            return res.status(400).json({ message: 'Invalid plan selected' });
         }
 
-        const request = await RoleUpgradeRequest.create({
+        // Apply simulated subscription upgrade
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 30); // 30 days subscription
+
+        const updateData = { 
+            role: 'organizer', 
+            plan: plan, 
+            roleExpiresAt: expiryDate 
+        };
+
+        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-password');
+
+        // Log the transaction
+        await RoleUpgradeRequest.create({
             user: userId,
-            message
+            plan: plan,
+            status: 'approved',
+            message: 'Simulated Subscription Purchase'
         });
 
-        res.status(201).json(request);
+        res.status(200).json({ message: 'Subscription activated', user: updatedUser });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

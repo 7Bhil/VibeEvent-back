@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: null
     },
+    plan: {
+        type: String,
+        enum: ['none', 'events_only', 'polls_only', 'premium'],
+        default: 'none'
+    },
     status: {
         type: String,
         enum: ['active', 'blocked'],

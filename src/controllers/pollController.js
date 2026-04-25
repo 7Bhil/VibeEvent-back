@@ -6,9 +6,11 @@ export const createPoll = async (req, res) => {
     try {
         const { eventId, question, description, options, expiresAt } = req.body;
         
-        const event = await Event.findById(eventId);
-        if (!event || event.createdBy.toString() !== req.user._id.toString()) {
-            return res.status(403).json({ message: "Vous ne pouvez créer des sondages que pour vos propres événements." });
+        if (eventId) {
+            const event = await Event.findById(eventId);
+            if (!event || event.createdBy.toString() !== req.user._id.toString()) {
+                return res.status(403).json({ message: "Vous ne pouvez créer des sondages que pour vos propres événements." });
+            }
         }
 
         const poll = await Poll.create({
@@ -52,10 +54,12 @@ export const voteInPoll = async (req, res) => {
             return res.status(400).json({ message: "Vous avez déjà voté pour ce sondage." });
         }
 
-        // Vérifier si l'utilisateur possède un ticket pour cet événement
-        const hasTicket = await Ticket.findOne({ event: poll.event, user: userId });
-        if (!hasTicket && req.user.role !== 'admin') {
-            return res.status(403).json({ message: "Seuls les détenteurs de billets peuvent voter." });
+        // Vérifier si l'utilisateur possède un ticket pour cet événement (si le sondage est lié à un événement)
+        if (poll.event) {
+            const hasTicket = await Ticket.findOne({ event: poll.event, user: userId });
+            if (!hasTicket && req.user.role !== 'admin') {
+                return res.status(403).json({ message: "Seuls les détenteurs de billets peuvent voter pour ce sondage lié à un événement." });
+            }
         }
 
         // Enregistrer le vote

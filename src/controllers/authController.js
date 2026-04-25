@@ -29,6 +29,7 @@ export const register = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                plan: user.plan,
                 organization: user.organization,
                 token: generateToken(user._id)
             });
@@ -48,6 +49,7 @@ export const login = async (req, res) => {
             // Check for role expiry during login
             if (user.roleExpiresAt && new Date() > user.roleExpiresAt) {
                 user.role = 'attendee';
+                user.plan = 'none';
                 user.roleExpiresAt = null;
                 await user.save();
             }
@@ -57,6 +59,7 @@ export const login = async (req, res) => {
                 name: user.name,
                 email: user.email,
                 role: user.role,
+                plan: user.plan,
                 organization: user.organization,
                 token: generateToken(user._id)
             });
