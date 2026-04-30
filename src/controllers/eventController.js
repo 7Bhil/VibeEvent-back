@@ -137,3 +137,33 @@ export const deleteEvent = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+export const updateEvent = async (req, res) => {
+    try {
+        const event = await Event.findById(req.params.id);
+        if (!event) return res.status(404).json({ message: 'Event not found' });
+
+        // Check authorization
+        if (event.createdBy.toString() !== req.user._id.toString()) {
+            return res.status(403).json({ message: 'Not authorized' });
+        }
+
+        // Update fields
+        const { title, description, date, location, category, tickets, currency, googleMapsLink, image } = req.body;
+        
+        if (title) event.title = title;
+        if (description) event.description = description;
+        if (date) event.date = date;
+        if (location) event.location = location;
+        if (category) event.category = category;
+        if (tickets) event.tickets = tickets;
+        if (currency) event.currency = currency;
+        if (googleMapsLink !== undefined) event.googleMapsLink = googleMapsLink;
+        if (image) event.image = image;
+
+        await event.save();
+        res.json(event);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
