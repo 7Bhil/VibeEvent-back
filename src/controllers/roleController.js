@@ -3,34 +3,31 @@ import User from '../models/User.js';
 
 export const requestUpgrade = async (req, res) => {
     try {
-        const { plan } = req.body; // 'events_only', 'polls_only', 'premium'
+        const { plan, message } = req.body; // 'events_only', 'polls_only', 'premium'
         const userId = req.user._id;
 
         if (!['events_only', 'polls_only', 'premium'].includes(plan)) {
             return res.status(400).json({ message: 'Invalid plan selected' });
         }
 
-        // Apply simulated subscription upgrade
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 30); // 30 days subscription
+        // Check if there is already a pending request
+        const existingRequest = await RoleUpgradeRequest.findOne({ user: userId, status: 'pending' });
+        if (existingRequest) {
+            return res.status(400).json({ message: 'You already have a pending request.' });
+        }
 
-        const updateData = { 
-            role: 'organizer', 
-            plan: plan, 
-            roleExpiresAt: expiryDate 
-        };
-
-        const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true }).select('-password');
-
-        // Log the transaction
-        await RoleUpgradeRequest.create({
+        // Create a pending request
+        const request = await RoleUpgradeRequest.create({
             user: userId,
             plan: plan,
-            status: 'approved',
-            message: 'Simulated Subscription Purchase'
+            status: 'pending',
+            message: message || 'Subscription upgrade request'
         });
 
-        res.status(200).json({ message: 'Subscription activated', user: updatedUser });
+        res.status(201).json({ 
+            message: 'Your upgrade request has been submitted and is pending administrator approval.', 
+            request 
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -55,7 +52,11 @@ export const handleRequest = async (req, res) => {
         if (action === 'approve') {
             request.status = 'approved';
             
-            const updateData = { role: 'organizer' };
+            const updateData = { 
+                role: 'organizer',
+                plan: request.plan // Important: set the plan!
+            };
+
             if (durationDays) {
                 const expiryDate = new Date();
                 expiryDate.setDate(expiryDate.getDate() + parseInt(durationDays));
