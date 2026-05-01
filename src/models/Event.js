@@ -10,7 +10,16 @@ const eventSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    // Legacy single-date field (kept for backward compatibility with older documents/clients)
     date: {
+        type: Date,
+        required: false
+    },
+    startAt: {
+        type: Date,
+        required: true
+    },
+    endAt: {
         type: Date,
         required: true
     },

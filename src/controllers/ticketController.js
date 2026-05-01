@@ -364,6 +364,22 @@ export const scanTicket = async (req, res) => {
         const ticket = await Ticket.findById(decoded.ticketId).populate('event');
         if (!ticket) return res.status(404).json({ message: 'Ticket introuvable' });
 
+        // Refuse scans after event end (ticket not valid anymore)
+        const eventEndAt = ticket.event?.endAt || ticket.event?.date;
+        const eventStartAt = ticket.event?.startAt || ticket.event?.date;
+
+        if (!eventStartAt || !eventEndAt) {
+            return res.status(400).json({ message: "Événement invalide (dates manquantes)" });
+        }
+
+        const now = new Date();
+        if (now < new Date(eventStartAt)) {
+            return res.status(400).json({ message: "L'événement n'a pas encore commencé." });
+        }
+        if (now > new Date(eventEndAt)) {
+            return res.status(400).json({ message: "Cet événement est terminé. Le billet n'est plus valable." });
+        }
+
         // Vérifier que le staff a le droit (appartient à l'orga de l'événement)
         const org = await Organization.findOne({ _id: ticket.event.organization, members: staffId });
         if (!org) {
