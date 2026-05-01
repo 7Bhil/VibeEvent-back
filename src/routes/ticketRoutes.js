@@ -1,10 +1,11 @@
 import express from 'express';
-import { buyTicket, getMyTickets, generateQRToken, scanTicket, getEventAttendees } from '../controllers/ticketController.js';
+import { buyTicket, getMyTickets, generateQRToken, scanTicket, getEventAttendees, confirmPayment } from '../controllers/ticketController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.post('/buy', protect, buyTicket);
+router.post('/confirm-payment', protect, confirmPayment);
 router.get('/my-tickets', protect, getMyTickets);
 router.get('/:ticketId/qr', protect, generateQRToken);
 router.post('/scan', protect, scanTicket);

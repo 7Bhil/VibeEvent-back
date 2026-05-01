@@ -25,6 +25,16 @@ const ticketSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    paymentTransactionId: {
+        type: String,
+        default: null,
+        index: true
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['free', 'pending', 'paid'],
+        default: 'free'
+    },
     scans: [{
         action: { 
             type: String, 

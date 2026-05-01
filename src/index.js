@@ -8,11 +8,14 @@ import eventRoutes from './routes/eventRoutes.js';
 import ticketRoutes from './routes/ticketRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import pollRoutes from './routes/pollRoutes.js';
+import { ticketWebhook } from './controllers/ticketController.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+app.post('/api/tickets/webhook', express.raw({ type: 'application/json' }), ticketWebhook);
 
 // Middleware
 app.use(cors());
